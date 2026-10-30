@@ -7,11 +7,15 @@ Cena obowiązująca: promocyjna (sale_price), jeśli dziś mieści się w sale_p
 """
 import csv
 import datetime as dt
+import os
 import re
 import sys
 import urllib.request
 
-SOURCE = "https://flystore.pl/console/integration/execute/name/FacebookCatalogFeed/lang/pl_PL"
+# Link z tokenem z panelu Shopera (Porównywarki cen) trzymany w sekrecie FEED_URL, bo repo jest publiczne.
+# Stary link bez tokena działa do 27.01.2027 i do tego czasu jest zapasem.
+FEED_URL = os.environ.get("FEED_URL", "").strip()
+OLD_SOURCE = "https://flystore.pl/console/integration/execute/name/FacebookCatalogFeed/lang/pl_PL"
 MIN_ROWS = 1000
 
 
@@ -41,9 +45,26 @@ def effective_price(entry, now):
     return sale
 
 
+def fetch(url):
+    req = urllib.request.Request(url, headers={"User-Agent": "FlyStore-Meta-Ceny/1.0"})
+    return urllib.request.urlopen(req, timeout=180).read().decode("utf-8")
+
+
+def load_feed():
+    if FEED_URL:
+        try:
+            xml = fetch(FEED_URL)
+            print("Źródło: link z tokenem (sekret FEED_URL)")
+            return xml
+        except Exception as e:
+            print(f"UWAGA: link z tokenem nie działa ({type(e).__name__}), biorę stary link")
+    else:
+        print("UWAGA: brak sekretu FEED_URL, biorę stary link (działa do 27.01.2027)")
+    return fetch(OLD_SOURCE)
+
+
 def main():
-    req = urllib.request.Request(SOURCE, headers={"User-Agent": "FlyStore-Meta-Ceny/1.0"})
-    xml = urllib.request.urlopen(req, timeout=180).read().decode("utf-8")
+    xml = load_feed()
     now = dt.datetime.now(dt.timezone.utc)
     rows = []
     for entry in re.findall(r"<entry>(.*?)</entry>", xml, re.S):
