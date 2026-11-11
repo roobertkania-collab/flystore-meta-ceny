@@ -9,6 +9,6 @@ Dodatkowy feed dla katalogu Meta (reklamy dynamiczne FlyStore.pl): cena z feedu 
 Dane w pliku to tylko numery produktów i ceny, publicznie widoczne w sklepie.
 
 ## Lista produktów z wysyłką 24 h (od 11.11.2026)
-- `wysylka24.py` co godzinę pobiera feed sklepu dla Ceneo i zapisuje `wysylka-24h.json` (`t` = czas feedu UTC, `ids` = produkty z `avail="1"`, czyli wysyłka 24 h i stan > 0).
+- `wysylka24.py` co godzinę (wywołuje go `build.py`, który też dodaje plik do commita) pobiera feed sklepu dla Ceneo i zapisuje `wysylka-24h.json` (`t` = czas feedu UTC, `ids` = produkty z `avail="1"`, czyli wysyłka 24 h i stan > 0).
 - Czyta go moduł 559 szablonu sklepu (kafle list: „Darmowa dostawa jutro”). Plik starszy niż 26 h moduł pomija.
 - Adres: `https://raw.githubusercontent.com/roobertkania-collab/flystore-meta-ceny/main/wysylka-24h.json`.

@@ -63,7 +63,22 @@ def load_feed():
     return fetch(OLD_SOURCE)
 
 
+def lista_24h():
+    """Lista produktów z wysyłką 24 h dla kafli sklepu (wysylka24.py). Uruchamiana stąd, bo krok „Zapisz zmiany”
+    w workflow dodaje tylko pliki cen, a token z komputera nie może zmieniać plików workflow (brak zakresu `workflow`).
+    Dlatego plik dodajemy do commita tutaj (`git add`). Przy najbliższej edycji workflow przez stronę GitHuba:
+    dopisz wysylka-24h.json do `git add` i przenieś to wywołanie do osobnego kroku. Błąd listy nie zatrzymuje cen."""
+    try:
+        import subprocess
+        import wysylka24
+        wysylka24.main()
+        subprocess.run(["git", "add", "wysylka-24h.json"], check=False)
+    except BaseException as e:
+        print(f"UWAGA: lista 24 h nie powstała ({type(e).__name__}: {e})")
+
+
 def main():
+    lista_24h()
     xml = load_feed()
     now = dt.datetime.now(dt.timezone.utc)
     rows = []
