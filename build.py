@@ -77,9 +77,22 @@ def lista_24h():
         print(f"UWAGA: lista 24 h nie powstała ({type(e).__name__}: {e})")
 
 
+def kafle_plik(xml):
+    """Oceny TrustMate i parametry dronów na kafle list sklepu (kafle.py, od 27.11.2026). Plik dodajemy do commita
+    tutaj z tego samego powodu co wysylka-24h.json (patrz lista_24h). Błąd kafli nie zatrzymuje cen."""
+    try:
+        import subprocess
+        import kafle
+        kafle.main(xml)
+        subprocess.run(["git", "add", "kafle.json"], check=False)
+    except BaseException as e:
+        print(f"UWAGA: plik kafli nie powstał ({type(e).__name__}: {e})")
+
+
 def main():
     lista_24h()
     xml = load_feed()
+    kafle_plik(xml)
     now = dt.datetime.now(dt.timezone.utc)
     rows = []
     for entry in re.findall(r"<entry>(.*?)</entry>", xml, re.S):
